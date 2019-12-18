@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "start": "node -e 'require(\"./index\").main()'",
+    "test": "jest"
+  },
+  "dependencies": {
+    "uuid": "^3.3.3"
+  }
+}
