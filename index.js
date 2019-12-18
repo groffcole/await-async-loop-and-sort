@@ -4,23 +4,27 @@ module.exports.main = async () => {
   let resultPromises = [];
 
   for (let i = 0; i < 5; i++) {
-    const resultPromise = getTwoUuids(i);
+    const resultPromise = getItems(i);
     resultPromises.push(resultPromise);
   };
 
-  await Promise.all(resultPromises);
+  const firstAwaitedPromises = await Promise.all(resultPromises);
+  const secondAwaitedPromises = await Promise.all(firstAwaitedPromises);
+  console.log(`secondAwaitedPromises: ${JSON.stringify(secondAwaitedPromises)}`);
 
   console.log(`DONE`);
 }
 
-const getTwoUuids = async (i) => {
+const getItems = async (i) => {
   await sleep();
   console.log(`i: ${i}`);
 
   return {
     Items: [
-      { uuid: { S: uuid() } },
-      { uuid: { S: uuid() } }
+      {
+        uuid: { S: uuid() },
+        date: { S: new Date(new Date().setDate(new Date().getDate() - i)).toISOString() }
+      }
     ]
   }
 };
