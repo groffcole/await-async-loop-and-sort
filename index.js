@@ -1,35 +1,46 @@
 const uuid = require("uuid/v4");
 
 module.exports.main = async () => {
-  let resultPromises = [];
+  let getItemsPromises = [];
 
   for (let i = 0; i < 5; i++) {
-    const resultPromise = getItems(i);
-    resultPromises.push(resultPromise);
+    getItemsPromises.push(getItems(i));
   };
 
-  const firstAwaitedPromises = await Promise.all(resultPromises);
-  const secondAwaitedPromises = await Promise.all(firstAwaitedPromises);
-  console.log(`secondAwaitedPromises: ${JSON.stringify(secondAwaitedPromises)}`);
+  const resolvedGetItemsPromises = await Promise.all(getItemsPromises);
+  const items = resolvedGetItemsPromises
+    .flatMap(result => result.Items)
+    .map(item => {
+      return {
+        uuid: item.uuid.S,
+        date: new Date(item.date.S)
+      }
+    });
 
-  console.log(`DONE`);
+  const itemsByMostRecent = items.sort((a, b) => b.date - a.date);
+  console.log(`itemsByMostRecent: ${JSON.stringify(itemsByMostRecent)}`);
 }
 
 const getItems = async (i) => {
-  await sleep();
+  await sleep(2000);
   console.log(`i: ${i}`);
 
   return {
-    Items: [
-      {
-        uuid: { S: uuid() },
-        date: { S: new Date(new Date().setDate(new Date().getDate() - i)).toISOString() }
-      }
-    ]
-  }
+    Items: [{
+      uuid: { S: uuid() },
+      date: { S: getRandomDateString(60) }
+    }]
+  };
 };
 
-const sleep = async () => {
-  const thePromise = new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * Math.floor(1000))));
-  return thePromise;
-}
+const sleep = async (ms) => {
+  return new Promise(resolve => setTimeout(resolve, getRandomNumber(ms)));
+};
+
+const getRandomDateString = (daysBackTo) => {
+  return new Date(new Date().setDate(new Date().getDate() - getRandomNumber(daysBackTo))).toISOString();
+};
+
+const getRandomNumber = (upTo) => {
+  return Math.floor(Math.random() * Math.floor(upTo));
+};
